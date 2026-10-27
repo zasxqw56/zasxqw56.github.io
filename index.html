@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>胡志明市旅遊攻略 APP</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: {
+                            850: '#0c382e',
+                            900: '#072b23',
+                            950: '#041d17',
+                        },
+                        champagne: {
+                            100: '#fdf8ec',
+                            200: '#f7e8c8',
+                            300: '#efd499',
+                            400: '#e5bc68',
+                            500: '#d49d37',
+                            600: '#b27b23',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans TC', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-thumb { background: #d49d37; border-radius: 4px; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        body {
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            background-color: #041d17;
+        }
+
+        .checkbox-custom:checked + label {
+            text-decoration: line-through;
+            opacity: 0.5;
+        }
+
+        .tab-btn-active {
+            color: #e5bc68 !important;
+        }
+    </style>
+</head>
+<body class="font-sans text-slate-800 antialiased min-h-screen flex justify-center items-center">
+
+    <!-- Mobile Frame Outer Container -->
+    <div class="w-full max-w-md h-screen md:h-[880px] bg-slate-100 flex flex-col relative overflow-hidden shadow-2xl md:rounded-3xl border-0 md:border-8 border-emerald-900">
+        
+        <!-- App Top Header -->
+        <header class="bg-emerald-900 text-white px-5 pt-10 pb-4 shadow-md flex justify-between items-center shrink-0 z-20 border-b border-champagne-500/20">
+            <div>
+                <div class="flex items-center gap-2">
+                    <span class="bg-champagne-500/20 text-champagne-300 text-[10px] px-2 py-0.5 rounded-full font-semibold border border-champagne-400/30">4天3夜自由行</span>
+                    <span class="text-[11px] text-emerald-200">10/28 - 10/31</span>
+                </div>
+                <h1 class="text-xl font-bold tracking-tight text-champagne-200 mt-1 flex items-center gap-2">
+                    胡志明市旅遊攻略 <i class="fa-solid fa-compass text-xs text-champagne-400"></i>
+                </h1>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleQuickSearch()" class="w-9 h-9 rounded-full bg-emerald-850 flex items-center justify-center text-champagne-300 hover:bg-emerald-800 transition border border-champagne-500/30">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Quick Search Bar (Collapsible) -->
+        <div id="quickSearchPanel" class="hidden bg-emerald-850 px-4 py-3 border-b border-emerald-700/50 z-20 shrink-0">
+            <div class="relative">
+                <i class="fa-solid fa-search absolute left-3 top-2.5 text-emerald-400 text-sm"></i>
+                <input type="text" id="searchInput" onkeyup="filterContent()" placeholder="搜尋景點、餐廳、SPA、攻略..." class="w-full bg-emerald-950 text-white pl-9 pr-8 py-1.5 rounded-xl text-sm focus:outline-none border border-champagne-500/40 placeholder-emerald-400/60">
+                <button onclick="clearSearch()" class="absolute right-3 top-2 text-emerald-400 hover:text-white text-xs">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT AREA (Scrollable) -->
+        <main class="flex-1 overflow-y-auto relative no-scrollbar pb-20 bg-slate-50">
+
+            <!-- TAB 1: 每日行程 -->
+            <section id="view-itinerary" class="tab-view block">
+                <!-- Day Selector Pills -->
+                <div class="sticky top-0 bg-slate-50/95 backdrop-blur-md px-4 py-3 border-b border-slate-200 z-10 flex gap-2 overflow-x-auto no-scrollbar">
+                    <button onclick="switchDay('day1')" id="btn-day1" class="day-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition bg-emerald-900 text-champagne-300 shadow">Day 1 (10/28 三)</button>
+                    <button onclick="switchDay('day2')" id="btn-day2" class="day-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition bg-white text-slate-600 border border-slate-200">Day 2 (10/29 四)</button>
+                    <button onclick="switchDay('day3')" id="btn-day3" class="day-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition bg-white text-slate-600 border border-slate-200">Day 3 (10/30 五)</button>
+                    <button onclick="switchDay('day4')" id="btn-day4" class="day-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold transition bg-white text-slate-600 border border-slate-200">Day 4 (10/31 六)</button>
+                </div>
+
+                <!-- DAY 1 CONTENT -->
+                <div id="day1" class="day-content p-4 space-y-4">
+                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 flex items-center justify-between">
+                        <span><i class="fa-solid fa-plane-arrival mr-1 text-amber-600"></i> 班機：越航 VN571 (07:45 ~ 10:25)</span>
+                        <span class="font-bold bg-amber-200/60 px-2 py-0.5 rounded">新山機場抵達</span>
+                    </div>
+
+                    <!-- Day 1 Items -->
+                    <div class="spot-card bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-100 text-emerald-900 font-bold text-xs px-2.5 py-1 rounded-lg">10:25 - 12:30</span>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="c1" class="checkbox-custom w-4 h-4 accent-emerald-800">
+                                <label for="c1" class="font-bold text-slate-900 text-sm">機場入境與飯店放行李</label>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-2">10:25~11:25 入境與領行李。出航廈後前往 5 號柱 (5GF) 或 12 號柱 (12GF) 過馬路至對面 Grab 乘車專區搭車。</p>
+                        <div class="mt-3 pt-3 border-t border-slate-100 flex justify-between items-center">
+                            <span class="text-xs text-slate-500"><i class="fa-solid fa-hotel text-champagne-600"></i> M Village Hotel Premier Thi Sách</span>
+                            <a href="https://www.google.com/maps/search/?api=1&query=M+Village+Hotel+Premier+Thi+Sach" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-3 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-100 flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot text-red-500"></i> 地圖
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="spot-card bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-100 text-emerald-900 font-bold text-xs px-2.5 py-1 rounded-lg">12:30 - 13:00</span>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="c2" class="checkbox-custom w-4 h-4 accent-emerald-800">
+                                <label for="c2" class="font-bold text-slate-900 text-sm">銀樓換錢 (Hưng Long)</label>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-2">步行約 10 分鐘 (650m)。換匯前先詢問匯率。帶美金 100 面額新鈔匯率最優！</p>
+                        <div class="mt-2 bg-slate-50 p-2.5 rounded-xl text-xs space-y-1 border border-slate-100">
+                            <p class="text-slate-700"><strong>參考匯率：</strong> 美金 1:25900 / 台幣 1:770~783</p>
+                            <p class="text-[11px] text-amber-700">【換台幣 2 萬，800 vs 770 差了約越盾 60 萬 (約 NT$750)】</p>
+                        </div>
+                        <div class="mt-3 pt-2 flex justify-between items-center border-t border-slate-100">
+                            <span class="text-xs text-slate-500">營業時間：8:00~20:00</span>
+                            <a href="https://www.google.com/maps/search/?api=1&query=Hung+Long+Money+Changer+Ho+Chi+Minh" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-3 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-100 flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot text-red-500"></i> 地圖
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="spot-card bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-100 text-emerald-900 font-bold text-xs px-2.5 py-1 rounded-lg">13:00 - 14:00</span>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="c3" class="checkbox-custom w-4 h-4 accent-emerald-800">
+                                <label for="c3" class="font-bold text-slate-900 text-sm">午餐：MANA Station</label>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-2">主打越南家常與傳統美食，結合北越與南越精緻口味。</p>
+                        <div class="mt-2 bg-amber-50/60 p-2.5 rounded-xl text-xs space-y-1 border border-amber-100 text-slate-700">
+                            <p class="font-bold text-amber-900">AI 推薦點餐：</p>
+                            <p>• 招牌嫩炒牛肉河粉 (Phở Tái Lăn) - 85,000 VND</p>
+                            <p>• 海防蟹膏紅蔥米粉 (大碗) - 90,000 VND</p>
+                            <p>• 炸蟹春捲 (Nem Cua Bể) - 35,000 VND/捲</p>
+                            <p>• 越南煉乳冰咖啡 - 30,000 VND/杯</p>
+                        </div>
+                        <div class="mt-3 pt-2 flex justify-between items-center border-t border-slate-100">
+                            <span class="text-xs text-slate-500">營業時間：7:00~22:00</span>
+                            <a href="https://www.google.com/maps/search/?api=1&query=MANA+Station+-+Tiem+An+Mon+Viet" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-3 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-100 flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot text-red-500"></i> 地圖
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="spot-card bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-100 text-emerald-900 font-bold text-xs px-2.5 py-1 rounded-lg">14:00 - 15:30</span>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="c4" class="checkbox-custom w-4 h-4 accent-emerald-800">
+                                <label for="c4" class="font-bold text-slate-900 text-sm">咖啡公寓 (The Cafe Apartment)</label>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-2">步行 6 分鐘 / 450m。搭電梯費用 5,000 VND (部分店家消費可折抵)。</p>
+                        <div class="mt-2 bg-slate-50 p-2.5 rounded-xl text-xs space-y-1 border border-slate-100 text-slate-700">
+                            <p class="font-bold text-slate-800">推薦店家：</p>
+                            <p>• 2F Poke Saigon | 3F Oops! Taiwan (水果飲品)</p>
+                            <p>• 5F Cà phê Sài Gòn Ơi (咖啡/河粉/法包)</p>
+                            <p>• The E.Y.E Saigon (帆布包文創創始店)</p>
+                        </div>
+                        <div class="mt-3 pt-2 flex justify-between items-center border-t border-slate-100">
+                            <span class="text-xs text-slate-500">營業時間：8:00~22:00</span>
+                            <a href="https://www.google.com/maps/search/?api=1&query=The+Cafe+Apartment+Ho+Chi+Minh" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-3 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-100 flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot text-red-500"></i> 地圖
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="spot-card bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-100 text-emerald-900 font-bold text-xs px-2.5 py-1 rounded-lg">15:30 - 17:00</span>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="c5" class="checkbox-custom w-4 h-4 accent-emerald-800">
+                                <label for="c5" class="font-bold text-slate-900 text-sm">Saigon Heritage Spa</label>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-2">位於 Mana Station 隔壁，可於去咖啡公寓前順路現場預約。</p>
+                        <div class="mt-2 bg-emerald-50/50 p-2.5 rounded-xl text-xs space-y-1 border border-emerald-100 text-slate-700">
+                            <p class="font-bold text-emerald-900">按摩價位選擇：</p>
+                            <p>• 基礎身體熱石按摩 (60分): 340,000 VND (~NT$440)</p>
+                            <p>• 招牌黃金全身按摩 (Gold Body): 420,000 VND (~NT$550)</p>
+                            <p>• 超值綜合套餐 (90分): 580,000 VND (~NT$750)</p>
+                            <p>• 奢華去角質套餐 (100分): 850,000 VND (~NT$1,100)</p>
+                        </div>
+                        <div class="mt-3 pt-2 flex justify-between items-center border-t border-slate-100">
+                            <span class="text-xs text-slate-500">17:00 回飯店 Check in</span>
+                            <a href="https://www.google.com/maps/search/?api=1&query=Saigon+Heritage+Spa+%26+Massage+club" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-3 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-100 flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot text-red-500"></i> 地圖
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="spot-card bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-100 text-emerald-900 font-bold text-xs px-2.5 py-1 rounded-lg">18:30 - 20:00</span>
+                            <span class="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded font-bold">已訂位 18:30</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 mt-1">晚餐：Pizza 4P's Le Thanh Ton</h3>
+                        <p class="text-xs text-slate-600 mt-2">18:10 飯店步行出發。必點：布拉塔起司帕瑪火腿瑪格麗特 Pizza、鮭魚奶油寬麵、松露布拉塔派。</p>
+                        <div class="mt-3 pt-2 flex justify-between items-center border-t border-slate-100">
+                            <span class="text-xs text-slate-500">營業時間：11:00~23:00</span>
+                            <a href="https://www.google.com/maps/search/?api=1&query=Pizza+4P%27s+Le+Thanh+Ton" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-3 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-100 flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot text-red-500"></i> 地圖
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="spot-card bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-100 text-emerald-900 font-bold text-xs px-2.5 py-1 rounded-lg">20:00 - 22:00</span>
+                            <span class="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded font-bold">已訂位 20:30</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 mt-1">Blank Lounge (Landmark 81 75F)</h3>
+                        <p class="text-xs text-slate-600 mt-2">Grab 下車地點設為 Vinpearl Landmark 81。先搭電梯至 48 樓點選目標樓層，再轉乘電梯上 75 樓。</p>
+                        <div class="mt-2 bg-amber-50/60 p-2.5 rounded-xl text-xs space-y-1 border border-amber-100 text-slate-700">
+                            <p class="font-bold text-amber-900">特調與飲品推薦：</p>
+                            <p>• Lotus Daiquiri (蓮花黛綺莉): 295,000 VND</p>
+                            <p>• Smoky Old Fashioned (八角煙燻): 295,000 VND</p>
+                            <p>• Chè Trôi Nước Milk Tea (薑汁湯圓奶茶): 210,000 VND</p>
+                            <p>• Lavender Smoothies (薰衣草冰沙): 195,000 VND</p>
+                            <p class="text-[10px] text-slate-500 mt-1">*結帳外加 10% VAT 與 5% 服務費 (定價 1.15 倍)</p>
+                        </div>
+                        <div class="mt-3 pt-2 flex justify-between items-center border-t border-slate-100">
+                            <span class="text-xs text-slate-500">俯瞰胡志明市璀璨夜景</span>
+                            <a href="https://www.google.com/maps/search/?api=1&query=Blank+Lounge+Landmark+81" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-3 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-100 flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot text-red-500"></i> 地圖
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DAY 2 CONTENT -->
+                <div id="day2" class="day-content hidden p-4 space-y-4">
+                    <div class="spot-card bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-100 text-emerald-900 font-bold text-xs px-2.5 py-1 rounded-lg">08:30 - 09:30</span>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="c2-1" class="checkbox-custom w-4 h-4 accent-emerald-800">
+                                <label for="c2-1" class="font-bold text-slate-900 text-sm">早餐：Hot Beans Coffee</label>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-2">早午餐與特調咖啡。氣氛舒適、餐點精緻。</p>
+                        <div class="mt-2 bg-slate-50 p-2.5 rounded-xl text-xs space-y-1 text-slate-700">
+                            <p class="font-bold text-emerald-900">AI 推薦點餐：</p>
+                            <p>• 冰鹽咖啡 (Ice Salted Coffee): 79,000 VND (熱銷第一)</p>
+                            <p>• 咖啡醬烤煙燻豬肋排: 149,000 VND</p>
+                            <p>• 松露油咖啡白醬義大利麵: 169,000 VND</p>
+                            <p>• 巴斯克乳酪蛋糕: 59,000 VND</p>
+                        </div>
+                        <div class="mt-3 pt-2 flex justify-between items-center border-t border-slate-100">
+                            <span class="text-xs text-slate-500">營業時間：07:00~22:30</span>
+                            <a href="https://www.google.com/maps/search/?api=1&query=Hot+Beans+Coffee+%26+Cuisine" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot text-red-500"></i> 地圖
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="spot-card bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-100 text-emerald-900 font-bold text-xs px-2.5 py-1 rounded-lg">10:00 - 16:00</span>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="c2-2" class="checkbox-custom w-4 h-4 accent-emerald-800">
+                                <label for="c2-2" class="font-bold text-slate-900 text-sm">服飾與百貨商圈大巡禮</label>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-2">地標標示：Daspace 2 周邊服飾設計商圈與百貨購物。</p>
+                        <div class="mt-2 bg-slate-50 p-2.5 rounded-xl text-xs space-y-1.5 text-slate-700">
+                            <p>1. <strong>大葉高島屋 (Takashimaya)</strong>：B1/B2 購買伴手禮</p>
+                            <p>2. <strong>無印良品</strong>：越式果乾、特色麻布袋</p>
+                            <p>3. <strong>Uniqlo 旗艦店</strong>：越南限定印花 T 恤</p>
+                            <p>4. <strong>Ivoire Pastry Boutique</strong>：魚子醬提拉米蘇(200k)、酪梨慕斯(180k)、千層蛋糕(160k)</p>
+                            <p>5. <strong>Waa.studio</strong>：當地人氣女用涼鞋與鞋飾店</p>
+                        </div>
+                        <div class="mt-3 pt-2 flex justify-end gap-2 border-t border-slate-100">
+                            <a href="https://www.google.com/maps/search/?api=1&query=Daspace+2+Ho+Chi+Minh" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-2.5 py-1 rounded border border-emerald-200">Daspace 2</a>
+                            <a href="https://www.google.com/maps/search/?api=1&query=Takashimaya+Vietnam" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-2.5 py-1 rounded border border-emerald-200">高島屋</a>
+                        </div>
+                    </div>
+
+                    <div class="spot-card bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-100 text-emerald-900 font-bold text-xs px-2.5 py-1 rounded-lg">16:00 - 18:00</span>
+                            <span class="bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded font-bold">官網預約</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 mt-1">Win Barbershop 皇家越式洗頭</h3>
+                        <p class="text-xs text-slate-600 mt-2">服務包含：修面/採耳、頭皮深層刮痧熱石按摩、全身精油按摩、足浴與草本洗髮吹整。</p>
+                        <div class="mt-2 bg-emerald-50/60 p-2.5 rounded-xl text-xs space-y-1 text-slate-700">
+                            <p>• <strong>標準套餐 (100分)</strong>：2手 600k / 4手 850k VND</p>
+                            <p>• <strong>皇家套餐 (120分, 20:30前可約)</strong>：2手 ~750k-800k / 4手 ~1,100k-1,200k VND</p>
+                        </div>
+                        <div class="mt-3 pt-2 flex justify-between items-center border-t border-slate-100">
+                            <span class="text-xs text-slate-500">享受極致越式舒壓</span>
+                            <a href="https://www.google.com/maps/search/?api=1&query=Win+Barbershop+Royal+Vietnamese+Hair+Wash" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot text-red-500"></i> 地圖
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="spot-card bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-100 text-emerald-900 font-bold text-xs px-2.5 py-1 rounded-lg">18:30 - 19:30</span>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="c2-4" class="checkbox-custom w-4 h-4 accent-emerald-800">
+                                <label for="c2-4" class="font-bold text-slate-900 text-sm">晚餐：Phở Việt Nam</label>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-2">米其林推薦！步行 7 分鐘 / 500m (營業至凌晨 03:00)。</p>
+                        <div class="mt-2 bg-amber-50/60 p-2.5 rounded-xl text-xs space-y-1 text-slate-700">
+                            <p class="font-bold text-amber-900">招牌滾燙石鍋河粉系列：</p>
+                            <p>1. 澳洲和牛石鍋河粉: 160,000 VND</p>
+                            <p>2. 綜合和牛石鍋 (C7): 135,000 VND (生和牛+牛腩+牛尾+牛肋排)</p>
+                            <p>3. 大滿貫綜合石鍋 (C5): 105,000 VND (人氣第一，湯頭鮮美)</p>
+                        </div>
+                        <div class="mt-3 pt-2 flex justify-between items-center border-t border-slate-100">
+                            <span class="text-xs text-slate-500">地址：14 Phạm Hồng Thái</span>
+                            <a href="https://www.google.com/maps/search/?api=1&query=Pho+Viet+Nam+14+Pham+Hong+Thai" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot text-red-500"></i> 地圖
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="spot-card bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-100 text-emerald-900 font-bold text-xs px-2.5 py-1 rounded-lg">19:00 / 晚間</span>
+                            <span class="text-xs text-slate-500">美甲 & 晚間夜生活</span>
+                        </div>
+                        <p class="text-xs font-bold text-purple-800 mt-2">• 綺綺美甲：Nailtopia Magic Nail Salon</p>
+                        <p class="text-xs text-slate-600 mt-1">• 晚間二選一提案：</p>
+                        <p class="text-xs text-slate-700 pl-3">A. <strong>Katinat-Bach Dang Wharf</strong> (營業至 02:00，必點酪梨嫩椰奶昔 55k)</p>
+                        <p class="text-xs text-slate-700 pl-3">B. <strong>MÙA Craft Sake</strong> (精緻清酒工藝與越式風味結合)</p>
+                        <div class="mt-3 pt-2 flex justify-end gap-2 border-t border-slate-100">
+                            <a href="https://www.google.com/maps/search/?api=1&query=Nailtopia+Magic+Nail+Salon" target="_blank" class="text-xs bg-purple-50 text-purple-800 font-semibold px-2.5 py-1 rounded border border-purple-200">美甲地圖</a>
+                            <a href="https://www.google.com/maps/search/?api=1&query=Katinat+Bach+Dang+Wharf" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-2.5 py-1 rounded border border-emerald-200">Katinat</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DAY 3 CONTENT -->
+                <div id="day3" class="day-content hidden p-4 space-y-4">
+                    <div class="spot-card bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-100 text-emerald-900 font-bold text-xs px-2.5 py-1 rounded-lg">09:00 - 11:30</span>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="c3-1" class="checkbox-custom w-4 h-4 accent-emerald-800">
+                                <label for="c3-1" class="font-bold text-slate-900 text-sm">NaH 化妝 & 美術館</label>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-2">09:30 綺綺 NaH Makeup 化妝服務；隨後走路/搭 Grab 前往胡志明美術館 (門票 30,000 VND)。</p>
+                        <div class="mt-3 pt-2 flex justify-end gap-2 border-t border-slate-100">
+                            <a href="https://www.google.com/maps/search/?api=1&query=NaH+Makeup+Academy" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-2.5 py-1 rounded border border-emerald-200">NaH Makeup</a>
+                            <a href="https://www.google.com/maps/search/?api=1&query=Ho+Chi+Minh+City+Museum+of+Fine+Arts" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-2.5 py-1 rounded border border-emerald-200">美術館地圖</a>
+                        </div>
+                    </div>
+
+                    <div class="spot-card bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-100 text-emerald-900 font-bold text-xs px-2.5 py-1 rounded-lg">11:30 - 13:00</span>
+                            <span class="bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded font-bold">米其林必比登</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 mt-1">午餐：Bếp Mẹ Ín (胖媽廚房)</h3>
+                        <div class="mt-2 bg-amber-50/60 p-2.5 rounded-xl text-xs space-y-1 text-slate-700">
+                            <p>• 招牌越式煎餅 (Bánh Xèo): 219,000 VND</p>
+                            <p>• 椰子炒飯 (Cơm Chiên Trái Dừa): 149,000 VND</p>
+                            <p>• 綜合烤牛肉串拼盤: 239,000 VND</p>
+                        </div>
+                        <div class="mt-3 pt-2 flex justify-between items-center border-t border-slate-100">
+                            <span class="text-xs text-slate-500">傳統越式料理</span>
+                            <a href="https://www.google.com/maps/search/?api=1&query=Bep+Me+In+Le+Thanh+Ton" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot text-red-500"></i> 地圖
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="spot-card bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-100 text-emerald-900 font-bold text-xs px-2.5 py-1 rounded-lg">13:30 - 16:00</span>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="c3-3" class="checkbox-custom w-4 h-4 accent-emerald-800">
+                                <label for="c3-3" class="font-bold text-slate-900 text-sm">粉紅教堂 & 市區地標巡禮</label>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-2">搭 Grab (約15分) 到粉紅教堂，至對面 <strong>Ola Hale</strong> 飲品店喝下午茶 (Tea Set 約 289k，推薦 2F/3F 落地窗景)。隨後遊覽人文書街、中央郵局、人民委員會大樓與文創店 OHQUAO。</p>
+                        <div class="mt-3 pt-2 flex justify-end gap-2 border-t border-slate-100">
+                            <a href="https://www.google.com/maps/search/?api=1&query=Tan+Dinh+Church+Ho+Chi+Minh" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-2.5 py-1 rounded border border-emerald-200">粉紅教堂</a>
+                            <a href="https://www.google.com/maps/search/?api=1&query=Ola+Hale+-+Restaurant+%26+Bar" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-2.5 py-1 rounded border border-emerald-200">Ola Hale</a>
+                        </div>
+                    </div>
+
+                    <div class="spot-card bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-100 text-emerald-900 font-bold text-xs px-2.5 py-1 rounded-lg">16:30 - 18:00</span>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="c3-4" class="checkbox-custom w-4 h-4 accent-emerald-800">
+                                <label for="c3-4" class="font-bold text-slate-900 text-sm">Miu Miu Spa 2 (按摩舒壓)</label>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-2">人氣超高 Spa，建議提早預約。熱石精油按摩首選。</p>
+                        <div class="mt-3 pt-2 flex justify-between items-center border-t border-slate-100">
+                            <span class="text-xs text-slate-500">精緻日式與越式服務</span>
+                            <a href="https://www.google.com/maps/search/?api=1&query=Miu+Miu+Spa+2+Ho+Chi+Minh" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot text-red-500"></i> 地圖
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="spot-card bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-100 text-emerald-900 font-bold text-xs px-2.5 py-1 rounded-lg">18:30 - 20:00</span>
+                            <span class="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded font-bold">已訂位 18:30</span>
+                        </div>
+                        <h3 class="font-bold text-slate-900 mt-1">晚餐：Cục Gạch Quán</h3>
+                        <p class="text-xs text-slate-600 mt-2">法式老宅風懷舊越菜，深受安潔莉娜裘莉喜愛。</p>
+                        <div class="mt-2 bg-amber-50/60 p-2.5 rounded-xl text-xs space-y-1 text-slate-700">
+                            <p>• 招牌炸豆腐配香草辣椒: 110,000 VND</p>
+                            <p>• 軟殼蟹佐蒜蓉辣椒: 290,000 VND</p>
+                            <p>• 燉豬肉佐焦糖醬: 180,000 VND</p>
+                        </div>
+                        <div class="mt-3 pt-2 flex justify-between items-center border-t border-slate-100">
+                            <span class="text-xs text-slate-500">營業時間：09:00~23:30</span>
+                            <a href="https://www.google.com/maps/search/?api=1&query=Cuc+Gach+Quan+Ho+Chi+Minh" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot text-red-500"></i> 地圖
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="spot-card bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-100 text-emerald-900 font-bold text-xs px-2.5 py-1 rounded-lg">20:30 - 22:30</span>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="c3-6" class="checkbox-custom w-4 h-4 accent-emerald-800">
+                                <label for="c3-6" class="font-bold text-slate-900 text-sm">Stir Speakeasy Bar</label>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-2">亞洲 50 大最佳酒吧之一！隱身於檳城市場旁古老公寓二樓。</p>
+                        <div class="mt-2 bg-slate-50 p-2.5 rounded-xl text-xs space-y-1 text-slate-700">
+                            <p>• 必點特調：Phở Cocktail (河粉風味特調): 290,000 VND</p>
+                            <p>• 茉莉花特調 (Jasmine Highball): 260,000 VND</p>
+                        </div>
+                        <div class="mt-3 pt-2 flex justify-between items-center border-t border-slate-100">
+                            <span class="text-xs text-slate-500">營業時間：17:30~02:00</span>
+                            <a href="https://www.google.com/maps/search/?api=1&query=Stir+-+Speakeasy+Cocktail+Bar" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot text-red-500"></i> 地圖
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DAY 4 CONTENT -->
+                <div id="day4" class="day-content hidden p-4 space-y-4">
+                    <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-900 flex items-center justify-between">
+                        <span><i class="fa-solid fa-plane-departure mr-1 text-amber-600"></i> 返程：越航 VN570 (16:25 ~ 21:05)</span>
+                        <span class="font-bold bg-amber-200/60 px-2 py-0.5 rounded">平安歸賦</span>
+                    </div>
+
+                    <div class="spot-card bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-100 text-emerald-900 font-bold text-xs px-2.5 py-1 rounded-lg">08:30 - 09:30</span>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="c4-1" class="checkbox-custom w-4 h-4 accent-emerald-800">
+                                <label for="c4-1" class="font-bold text-slate-900 text-sm">早餐：Bánh Mì Huỳnh Hoa</label>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-2">胡志明市最猛的超級法式麵包！肉餡超厚實，兩個人吃一份剛好。</p>
+                        <div class="mt-2 bg-slate-50 p-2 rounded-xl text-xs text-slate-700">
+                            <p>• 招牌綜合法式麵包: 68,000 VND</p>
+                        </div>
+                        <div class="mt-3 pt-2 flex justify-between items-center border-t border-slate-100">
+                            <span class="text-xs text-slate-500">營業時間：06:00~22:00</span>
+                            <a href="https://www.google.com/maps/search/?api=1&query=Banh+Mi+Huynh+Hoa" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot text-red-500"></i> 地圖
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="spot-card bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-100 text-emerald-900 font-bold text-xs px-2.5 py-1 rounded-lg">10:00 - 12:00</span>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="c4-2" class="checkbox-custom w-4 h-4 accent-emerald-800">
+                                <label for="c4-2" class="font-bold text-slate-900 text-sm">最後採買 &amp; 退房</label>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-2">前往 Co.opmart 或 WinMart 超市補貨伴手禮（腰果、腰果塔、越南咖啡、腰果糖、蛋黃餅）。12:00 辦理退房手續並可寄放行李。</p>
+                        <div class="mt-3 pt-2 flex justify-end gap-2 border-t border-slate-100">
+                            <a href="https://www.google.com/maps/search/?api=1&query=Coopmart+Ho+Chi+Minh" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-2.5 py-1 rounded border border-emerald-200">Co.opmart</a>
+                        </div>
+                    </div>
+
+                    <div class="spot-card bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-100 text-emerald-900 font-bold text-xs px-2.5 py-1 rounded-lg">12:30 - 13:30</span>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="c4-3" class="checkbox-custom w-4 h-4 accent-emerald-800">
+                                <label for="c4-3" class="font-bold text-slate-900 text-sm">午餐：Phở Clố (石鍋河粉)</label>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-2">離飯店不遠的精緻石鍋河粉，高湯濃郁、牛肉嫩滑。</p>
+                        <div class="mt-2 bg-slate-50 p-2 rounded-xl text-xs text-slate-700">
+                            <p>• 石鍋牛肉河粉: 95,000 ~ 130,000 VND</p>
+                        </div>
+                        <div class="mt-3 pt-2 flex justify-between items-center border-t border-slate-100">
+                            <span class="text-xs text-slate-500">吃完準備前往機場</span>
+                            <a href="https://www.google.com/maps/search/?api=1&query=Pho+Clo+Ho+Chi+Minh" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 font-semibold px-3 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot text-red-500"></i> 地圖
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="spot-card bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-emerald-100 text-emerald-900 font-bold text-xs px-2.5 py-1 rounded-lg">13:30 - 16:25</span>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="c4-4" class="checkbox-custom w-4 h-4 accent-emerald-800">
+                                <label for="c4-4" class="font-bold text-slate-900 text-sm">前往新山機場 &amp; 辦理退稅</label>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-2">13:30 拿行李搭 Grab 前往機場 (預留 3 小時以上防塞車)。辦理 Check-in、VAT 退稅與海關出境手續。16:25 順利起飛！</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: 實用攻略 -->
+            <section id="view-guide" class="tab-view hidden p-4 space-y-4">
+                <h2 class="text-base font-bold text-emerald-900 flex items-center gap-2">
+                    <i class="fa-solid fa-lightbulb text-champagne-500"></i> 胡志明市行前必看與退稅攻略
+                </h2>
+
+                <!-- 交通與 Grab -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 space-y-2">
+                    <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-car text-emerald-700"></i> Grab 叫車與機場接駁
+                    </h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        出機場後請勿聽信路邊拉客。直接走到 5 號柱 (5GF) 或 12 號柱 (12GF) 過馬路到專屬 Grab 候車區。綁定信用卡扣款最方便，不必找零。
+                    </p>
+                </div>
+
+                <!-- 退稅 VAT 攻略 -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 space-y-3">
+                    <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-file-invoice-dollar text-emerald-700"></i> 8% VAT 退稅完整流程
+                    </h3>
+                    <div class="bg-amber-50 p-3 rounded-xl border border-amber-200 text-xs text-amber-900 space-y-1">
+                        <p class="font-bold">門檻：單日同一店家消費滿 2,000,000 VND</p>
+                        <p>購物時須主動出示護照，要求開立退稅單 (VAT Refund Claim Form)。</p>
+                    </div>
+
+                    <div class="space-y-2 text-xs text-slate-700">
+                        <p class="font-bold text-emerald-900">【流程 A：退稅商品要托運】</p>
+                        <ol class="list-decimal pl-4 space-y-1 text-slate-600">
+                            <li>先到機場 VAT 海關檢查櫃檯 (Customs Inspection Office)。</li>
+                            <li>出示：護照、退稅單、發票、商品。</li>
+                            <li>海關蓋章後，再去航空櫃檯辦理托運 Check-in。</li>
+                            <li>過安檢出境後，至海關退稅櫃檯 (Refund Counter) 領取現金。</li>
+                        </ol>
+
+                        <p class="font-bold text-emerald-900 pt-2">【流程 B：退稅商品隨身手提】</p>
+                        <ol class="list-decimal pl-4 space-y-1 text-slate-600">
+                            <li>先辦理航空公司 Check-in 與領取登機證。</li>
+                            <li>通過海關與安檢後，在管制區內的 VAT 海關檢查櫃檯審查並蓋章。</li>
+                            <li>直接在旁邊的退稅櫃檯領取現金 (可選美元或越盾)。</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <!-- 插頭與電壓 -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 space-y-2">
+                    <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-plug text-emerald-700"></i> 電壓與插頭
+                    </h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        越南電壓為 220V / 50Hz。插座通常相容台灣雙平腳插頭，手機、相機變壓器 (100-240V) 可直接使用。
+                    </p>
+                </div>
+            </section>
+
+            <!-- TAB 3: 美食與 SPA -->
+            <section id="view-food" class="tab-view hidden p-4 space-y-4">
+                <h2 class="text-base font-bold text-emerald-900 flex items-center gap-2">
+                    <i class="fa-solid fa-utensils text-champagne-500"></i> 精選美食、酒吧與 SPA 價目表
+                </h2>
+
+                <!-- 米其林河粉推薦 -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-slate-900 text-sm">Phở Việt Nam (米其林推薦)</h3>
+                        <a href="https://www.google.com/maps/search/?api=1&query=Pho+Viet+Nam+14+Pham+Hong+Thai" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 px-2 py-1 rounded">地圖</a>
+                    </div>
+                    <ul class="text-xs text-slate-600 space-y-1">
+                        <li>• 澳洲和牛石鍋河粉: 160,000 VND (~NT$205)</li>
+                        <li>• 綜合和牛石鍋 (C7): 135,000 VND</li>
+                        <li>• 人氣第一大滿貫石鍋 (C5): 105,000 VND</li>
+                    </ul>
+                </div>
+
+                <!-- Bếp Mẹ Ín -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-slate-900 text-sm">Bếp Mẹ Ín (胖媽廚房)</h3>
+                        <a href="https://www.google.com/maps/search/?api=1&query=Bep+Me+In+Le+Thanh+Ton" target="_blank" class="text-xs bg-emerald-50 text-emerald-800 px-2 py-1 rounded">地圖</a>
+                    </div>
+                    <ul class="text-xs text-slate-600 space-y-1">
+                        <li>• 招牌越式煎餅 (Bánh Xèo): 219,000 VND</li>
+                        <li>• 椰子炒飯 (Cơm Chiên Trái Dừa): 149,000 VND</li>
+                        <li>• 烤牛肉串拼盤: 239,000 VND</li>
+                    </ul>
+                </div>
+
+                <!-- SPA 價目對照表 -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 space-y-2">
+                    <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-spa text-purple-700"></i> Saigon Heritage Spa 價目表
+                    </h3>
+                    <div class="text-xs text-slate-600 space-y-1.5 border-t border-slate-100 pt-2">
+                        <div class="flex justify-between"><span>基礎熱石身體按摩 (60分)</span><span class="font-bold text-emerald-800">340k VND (~NT$440)</span></div>
+                        <div class="flex justify-between"><span>招牌黃金全身按摩 (Gold Body)</span><span class="font-bold text-emerald-800">420k VND (~NT$550)</span></div>
+                        <div class="flex justify-between"><span>超值綜合按摩套餐 (90分)</span><span class="font-bold text-emerald-800">580k VND (~NT$750)</span></div>
+                        <div class="flex justify-between"><span>奢華去角質套餐 (100分)</span><span class="font-bold text-emerald-800">850k VND (~NT$1,100)</span></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: 實用工具 (即時換匯與清單) -->
+            <section id="view-tools" class="tab-view hidden p-4 space-y-4">
+                <h2 class="text-base font-bold text-emerald-900 flex items-center gap-2">
+                    <i class="fa-solid fa-calculator text-champagne-500"></i> 即時匯率換算 &amp; 行前檢查
+                </h2>
+
+                <!-- 換算器 -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 space-y-3">
+                    <h3 class="font-bold text-slate-900 text-sm">越盾 (VND) 轉 台幣 (TWD)</h3>
+                    <div class="space-y-2">
+                        <div>
+                            <label class="text-xs text-slate-500">輸入越南盾金額 (VND)</label>
+                            <input type="number" id="vndInput" oninput="convertCurrency()" placeholder="例如: 250000" class="w-full bg-slate-50 text-slate-900 font-bold px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-emerald-700">
+                        </div>
+                        <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-100 flex justify-between items-center">
+                            <span class="text-xs text-emerald-900">折合台幣約：</span>
+                            <span id="twdResult" class="text-lg font-bold text-emerald-900">NT$ 0</span>
+                        </div>
+                        <p class="text-[10px] text-slate-400 text-right">*以預設平均匯率 1 TWD ≈ 775 VND 計算</p>
+                    </div>
+                </div>
+
+                <!-- 出遊清單 -->
+                <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 space-y-2">
+                    <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-clipboard-check text-emerald-700"></i> 行前必帶物品 Checklist
+                    </h3>
+                    <div class="space-y-2 text-xs text-slate-700">
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" id="p1" class="w-4 h-4 accent-emerald-800">
+                            <label for="p1">護照 (有效期6個月以上) + 簽證印出紙本</label>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" id="p2" class="w-4 h-4 accent-emerald-800">
+                            <label for="p2">美金百元新鈔 (銀樓換匯用)</label>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" id="p3" class="w-4 h-4 accent-emerald-800">
+                            <label for="p3">網卡 (eSIM / 實體卡已準備)</label>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" id="p4" class="w-4 h-4 accent-emerald-800">
+                            <label for="p4">Grab App 下載並綁定信用卡</label>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" id="p5" class="w-4 h-4 accent-emerald-800">
+                            <label for="p5">常備藥品 (腸胃藥、止痛藥、防蚊液)</label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- APP BOTTOM NAVIGATION BAR -->
+        <nav class="absolute bottom-0 left-0 right-0 h-16 bg-emerald-900 border-t border-champagne-500/30 flex justify-around items-center z-30 px-2 shadow-lg">
+            <button onclick="switchTab('itinerary')" id="nav-itinerary" class="nav-btn flex flex-col items-center justify-center w-full h-full text-champagne-300 transition">
+                <i class="fa-solid fa-calendar-days text-lg"></i>
+                <span class="text-[10px] mt-1 font-medium">每日行程</span>
+            </button>
+            <button onclick="switchTab('guide')" id="nav-guide" class="nav-btn flex flex-col items-center justify-center w-full h-full text-emerald-300/60 hover:text-champagne-200 transition">
+                <i class="fa-solid fa-map-location-dot text-lg"></i>
+                <span class="text-[10px] mt-1 font-medium">實用攻略</span>
+            </button>
+            <button onclick="switchTab('food')" id="nav-food" class="nav-btn flex flex-col items-center justify-center w-full h-full text-emerald-300/60 hover:text-champagne-200 transition">
+                <i class="fa-solid fa-utensils text-lg"></i>
+                <span class="text-[10px] mt-1 font-medium">美食SPA</span>
+            </button>
+            <button onclick="switchTab('tools')" id="nav-tools" class="nav-btn flex flex-col items-center justify-center w-full h-full text-emerald-300/60 hover:text-champagne-200 transition">
+                <i class="fa-solid fa-calculator text-lg"></i>
+                <span class="text-[10px] mt-1 font-medium">實用工具</span>
+            </button>
+        </nav>
+
+    </div>
+
+    <!-- APP JAVASCRIPT -->
+    <script>
+        // Tab Navigation Switcher
+        function switchTab(tabId) {
+            // Hide all tab views
+            document.querySelectorAll('.tab-view').forEach(view => {
+                view.classList.add('hidden');
+                view.classList.remove('block');
+            });
+            // Show selected tab view
+            document.getElementById(`view-${tabId}`).classList.remove('hidden');
+            document.getElementById(`view-${tabId}`).classList.add('block');
+
+            // Reset Nav Active state
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-champagne-300');
+                btn.classList.add('text-emerald-300/60');
+            });
+            // Highlight current Nav
+            document.getElementById(`nav-${tabId}`).classList.add('text-champagne-300');
+            document.getElementById(`nav-${tabId}`).classList.remove('text-emerald-300/60');
+        }
+
+        // Day Switcher for Itinerary Tab
+        function switchDay(dayId) {
+            document.querySelectorAll('.day-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.getElementById(dayId).classList.remove('hidden');
+
+            document.querySelectorAll('.day-btn').forEach(btn => {
+                btn.classList.remove('bg-emerald-900', 'text-champagne-300', 'shadow');
+                btn.classList.add('bg-white', 'text-slate-600', 'border', 'border-slate-200');
+            });
+
+            const activeBtn = document.getElementById(`btn-${dayId}`);
+            activeBtn.classList.remove('bg-white', 'text-slate-600', 'border', 'border-slate-200');
+            activeBtn.classList.add('bg-emerald-900', 'text-champagne-300', 'shadow');
+        }
+
+        // Quick Search Toggle
+        function toggleQuickSearch() {
+            const panel = document.getElementById('quickSearchPanel');
+            panel.classList.toggle('hidden');
+        }
+
+        // Filter Content Logic
+        function filterContent() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const cards = document.querySelectorAll('.spot-card');
+            cards.forEach(card => {
+                const text = card.innerText.toLowerCase();
+                if (text.includes(query)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function clearSearch() {
+            document.getElementById('searchInput').value = '';
+            filterContent();
+        }
+
+        // Currency Converter
+        function convertCurrency() {
+            const vnd = parseFloat(document.getElementById('vndInput').value) || 0;
+            const twdRate = 775; // 1 TWD ≈ 775 VND
+            const twd = Math.round(vnd / twdRate);
+            document.getElementById('twdResult').innerText = `NT$ ${twd.toLocaleString()}`;
+        }
+    </script>
+</body>
+</html>
